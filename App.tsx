@@ -1,10 +1,12 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import Header from './components/Header';
 import Controls from './components/Controls';
 import AudioPlayer from './components/AudioPlayer';
 import { VoiceName } from './types';
-import { generateSpeech } from './services/geminiService';
+import { streamSpeech } from './services/geminiService';
 import { AlertCircle } from 'lucide-react';
+import { AudioStreamer } from './utils/audioStreamer';
+import { base64ToUint8Array, concatenateBuffers, createWavBlob } from './utils/audioUtils';
 
 const App: React.FC = () => {
   const [text, setText] = useState('');
@@ -14,6 +16,9 @@ const App: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  
+  // Ref for the streamer to persist across renders
+  const streamerRef = useRef<AudioStreamer | null>(null);
 
   const handleConvert = useCallback(async () => {
     if (!text.trim()) {
@@ -23,14 +28,44 @@ const App: React.FC = () => {
 
     setIsGenerating(true);
     setError(null);
-    setAudioUrl(null); // Clear previous audio while loading
+    setAudioUrl(null); // Clear previous audio
+
+    // Initialize streamer if not exists
+    if (!streamerRef.current) {
+      streamerRef.current = new AudioStreamer(24000);
+    }
+    
+    // Setup streamer
+    const streamer = streamerRef.current;
+    streamer.init(); // Resume AudioContext if suspended
+    streamer.setPlaybackRate(speechRate);
+
+    const collectedChunks: Uint8Array[] = [];
 
     try {
-      // Pass rate and pitch to the service
-      const url = await generateSpeech(text, voice, speechRate, speechPitch);
-      setAudioUrl(url);
+      const stream = streamSpeech(text, voice, speechRate, speechPitch);
+
+      for await (const base64Chunk of stream) {
+        // 1. Play chunk immediately
+        await streamer.playChunk(base64Chunk);
+        
+        // 2. Store chunk for final file creation
+        const uint8Chunk = base64ToUint8Array(base64Chunk);
+        collectedChunks.push(uint8Chunk);
+      }
+
+      // 3. After stream finishes, compile the full file for the AudioPlayer (Download/Seek)
+      if (collectedChunks.length > 0) {
+        const fullPcmData = concatenateBuffers(collectedChunks);
+        const wavBlob = createWavBlob(fullPcmData, 24000);
+        const url = URL.createObjectURL(wavBlob);
+        setAudioUrl(url);
+      }
+
     } catch (err: any) {
-      setError(err.message || "An unexpected error occurred.");
+      console.error("Streaming error:", err);
+      setError(err.message || "An error occurred during speech generation.");
+      streamer.stop();
     } finally {
       setIsGenerating(false);
     }

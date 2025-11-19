@@ -8,10 +8,51 @@ if (!API_KEY) {
   console.error("API_KEY is missing from environment variables.");
 }
 
-// Re-initialize client on each call to ensure fresh state if needed, 
-// though primarily important for key changes in some contexts.
+// Re-initialize client on each call to ensure fresh state if needed
 const getClient = () => new GoogleGenAI({ apiKey: API_KEY });
 
+/**
+ * Generates speech using streaming to allow for immediate playback.
+ * Yields base64 encoded PCM audio chunks.
+ */
+export async function* streamSpeech(
+  text: string,
+  voice: VoiceName,
+  speechRate: number, // Note: Rate is handled client-side in streaming
+  speechPitch: number
+) {
+  if (!Object.values(VoiceName).includes(voice)) {
+      throw new Error(`Invalid voice selected: ${voice}`);
+  }
+
+  const ai = getClient();
+  
+  const responseStream = await ai.models.generateContentStream({
+    model: "gemini-2.5-flash-preview-tts",
+    contents: {
+      parts: [{ text }],
+    },
+    config: {
+      responseModalities: [Modality.AUDIO],
+      speechConfig: {
+        voiceConfig: {
+          prebuiltVoiceConfig: { 
+            voiceName: voice,
+          },
+        },
+      },
+    },
+  });
+
+  for await (const chunk of responseStream) {
+    const base64Audio = chunk.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+    if (base64Audio) {
+      yield base64Audio;
+    }
+  }
+}
+
+// Keep existing non-streaming function for reference or fallback if needed
 export const generateSpeech = async (
   text: string,
   voice: VoiceName,
@@ -36,8 +77,6 @@ export const generateSpeech = async (
           voiceConfig: {
             prebuiltVoiceConfig: { 
               voiceName: voice,
-              // Note: Pitch and Rate are passed here for completeness, 
-              // though API support depends on the specific model version capabilities.
             },
           },
         },

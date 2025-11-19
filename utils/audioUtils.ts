@@ -15,6 +15,20 @@ export const base64ToUint8Array = (base64: string): Uint8Array => {
 };
 
 /**
+ * Concatenates multiple Uint8Arrays into a single Uint8Array
+ */
+export const concatenateBuffers = (buffers: Uint8Array[]): Uint8Array => {
+  const totalLength = buffers.reduce((acc, b) => acc + b.length, 0);
+  const result = new Uint8Array(totalLength);
+  let offset = 0;
+  for (const b of buffers) {
+    result.set(b, offset);
+    offset += b.length;
+  }
+  return result;
+};
+
+/**
  * Creates a WAV file header and prepends it to raw PCM data.
  * Assumes 16-bit PCM, 24kHz, Mono (based on Gemini TTS specs).
  */
@@ -65,10 +79,6 @@ export const convertWavToMp3 = async (wavBlob: Blob): Promise<Blob> => {
   const view = new DataView(arrayBuffer);
 
   // WAV Header Parsing (Simplistic, assuming standard canonical WAV from createWavBlob)
-  // Offset 22: NumChannels (uint16)
-  // Offset 24: SampleRate (uint32)
-  // Offset 44: Start of PCM data (assuming standard 44 byte header)
-  
   const channels = view.getUint16(22, true);
   const sampleRate = view.getUint32(24, true);
   const pcmData = new Int16Array(arrayBuffer.slice(44));
@@ -79,14 +89,6 @@ export const convertWavToMp3 = async (wavBlob: Blob): Promise<Blob> => {
   const mp3Data: Int8Array[] = [];
   
   // Encode
-  // Note: encodeBuffer expects Int16Array. 
-  // If stereo, it expects (left, right). Since we are mostly mono, we pass pcmData.
-  // If stereo, we would need to split channels, but createWavBlob forces mono currently.
-  
-  const sampleBlockSize = 1152; 
-  // We can encode all at once for small files, but typically it's done in chunks.
-  // For browser simplicty with expected short TTS clips, passing the whole buffer is usually fine.
-  
   const mp3buf = encoder.encodeBuffer(pcmData);
   if (mp3buf.length > 0) {
     mp3Data.push(mp3buf);
