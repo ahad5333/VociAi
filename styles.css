@@ -1,0 +1,187 @@
+/* ================== THEME VARIABLES ================== */
+:root {
+  /* --- Colors --- */
+  --bg-app: #2A7B9B; /* Fallback solid background */
+  --bg-gradient: linear-gradient(90deg, rgba(42,123,155,1) 0%, rgba(87,199,133,1) 85%, rgba(237,221,83,1) 100%);
+  
+  --bg-card: rgba(255, 255, 255, 0.95);  /* Semi-transparent cards for gradient background */
+  --bg-header: rgba(255, 255, 255, 0.85); /* Header semi-transparent */
+
+  --color-primary: #2A7B9B; /* Deep teal accent */
+  --color-primary-hover: #1F5E75;
+  --color-primary-text: #ffffff;
+
+  --text-main: #111827;        /* Dark text for readability */
+  --text-secondary: #4B5563;   /* Subtle text */
+  --text-alt: #6B7280;         /* Placeholder text */
+
+  --border-color: rgba(255,255,255,0.3);
+
+  --status-error-bg: #fee2e2;
+  --status-error-text: #B91C1C;
+
+  /* --- Spacing & Radius --- */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+}
+
+/* ================== GLOBAL STYLES ================== */
+body {
+  background: var(--bg-gradient);
+  color: var(--text-main);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* ================== HEADER ================== */
+.header-container {
+  background-color: var(--bg-header);
+  border-bottom: 1px solid var(--border-color);
+  backdrop-filter: blur(10px);
+  padding: 1rem 2rem;
+}
+
+.header-icon-box {
+  background: var(--bg-gradient);
+  color: var(--color-primary-text);
+  border-radius: var(--radius-md);
+  padding: 0.5rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+/* ================== CARDS ================== */
+.card-main {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  padding: 1rem;
+  backdrop-filter: blur(6px);
+}
+
+/* ================== FORM ELEMENTS ================== */
+.input-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.input-field {
+  background-color: #ffffffcc; /* Slight transparency */
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(42,123,155,0.25);
+}
+
+.input-field::placeholder {
+  color: var(--text-alt);
+}
+
+/* ================== BUTTONS ================== */
+.btn-primary {
+  background: var(--bg-gradient);
+  color: var(--color-primary-text);
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-primary:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+  color: #ffffff;
+}
+
+/* ================== AUDIO PLAYER ================== */
+.player-card {
+  background-color: #ffffffdd; /* Slightly transparent card */
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  backdrop-filter: blur(6px);
+}
+
+.player-btn-play {
+  background: var(--bg-gradient);
+  color: var(--color-primary-text);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.player-btn-play:hover {
+  filter: brightness(1.2);
+}
+
+.player-btn-download {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  border-radius: var(--radius-md);
+  padding: 0.4rem 0.8rem;
+  transition: all 0.2s ease;
+}
+
+.player-btn-download:hover {
+  background: var(--bg-gradient);
+  color: var(--color-primary-text);
+}
+
+/* ================== RANGE SLIDER ================== */
+input[type=range] {
+  height: 6px;
+  border-radius: 4px;
+  background: #e5e7eb;
+  background-image: linear-gradient(var(--color-primary), var(--color-primary));
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  accent-color: var(--color-primary);
+}
+
+/* ================== ERROR MESSAGES ================== */
+.error-box {
+  background-color: var(--status-error-bg);
+  border: 1px solid #fca5a5;
+  color: var(--status-error-text);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 1rem;
+}
+
+.footer-text {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}

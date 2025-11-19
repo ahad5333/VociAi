@@ -1,0 +1,5 @@
+{
+  "name": "Text-To-Voice",
+  "description": "A professional text-to-speech converter using Google's Gemini 2.5 Flash TTS model. Generates high-quality, natural-sounding speech with downloadable audio files.",
+  "requestFramePermissions": []
+}
